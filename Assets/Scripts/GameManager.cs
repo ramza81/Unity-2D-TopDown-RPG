@@ -9,20 +9,44 @@ public class GameManager : MonoBehaviour
     public Text talkText;
     public GameObject scanObject;
     public bool isAction;
+    public TalkManager talkManager;
+    public int talkIndex;
+    public Image portraitImg;
 
     public void Action(GameObject scanObj)
     {
-        if (isAction)
+        scanObject = scanObj;
+        ObjectData objectData = scanObj.GetComponent<ObjectData>();
+        Talk(objectData.id, objectData.isNpc);
+
+        talkPanel.SetActive(isAction);
+    }
+
+    void Talk(int id, bool isNpc)
+    {
+        string talkData = talkManager.GetTalk(id, talkIndex);
+
+        if (talkData == null)
         {
             isAction = false;
+            talkIndex = 0;
+            return;
+        }
+
+        if (isNpc)
+        {
+            talkText.text = talkData.Split(':')[0];
+
+            portraitImg.sprite = talkManager.GetPortrait(id, int.Parse(talkData.Split(':')[1]));
+            portraitImg.color = new Color(1, 1, 1, 1);
         }
         else
         {
-            isAction = true;
-            scanObject = scanObj;
-            talkText.text = $"이것의 이름은 {scanObject.name} 이라고 한다.";
+            talkText.text = talkData;
+            portraitImg.color = new Color(1, 1, 1, 0);
         }
 
-        talkPanel.SetActive(isAction);
+        isAction = true;
+        talkIndex++;
     }
 }
